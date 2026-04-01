@@ -21,4 +21,4 @@ jobs:
       - name: 📦 Install dependencies
         run: npm init -y && npm install
       - name: ✅ Run test
-        run: echo "Hello GitHub Actions! Tests passed! 🎉"
+        run: echo "PR test triggered! 🚀"
