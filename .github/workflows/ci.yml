@@ -4,7 +4,9 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-
+  schedule:
+    - cron: '0 6 * * 1' # Chạy 6h sáng thứ 2 hàng tuần 
+  workflow_dispatch: # Cho phép chạy thủ công từ GitHub UI
 jobs:
   test:
     runs-on: ubuntu-latest
