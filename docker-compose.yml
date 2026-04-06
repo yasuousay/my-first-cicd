@@ -1,72 +1,57 @@
-version: '3.8'
-
 services:
-  frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
-    depends_on:
-      - backend
   database:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: myapp
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d myapp"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-  backend:
-    image: node:20-alpine
-    working_dir: /app
-    command: sh -c "npm install express && node server.js"
-    ports:
-      - "8080:8080"
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
-      - ./server.js:/app/server.js
+      - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/api/health"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
       interval: 10s
       timeout: 5s
       retries: 5
+
+  backend:
+    build: ./backend
+    environment:
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB}
     depends_on:
       database:
         condition: service_healthy
-  nginx:
-    image: nginx:alpine
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/api/health || exit 1"]
+
+  frontend:
+    build: ./frontend
     ports:
-    - "80:80"
-    - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - "80:80"
     depends_on:
-      - frontend
-      - backend
+      backend:
+        condition: service_healthy
+
   prometheus:
-      image: prom/prometheus:latest
-      container_name: prometheus
-      ports:
-        - "9090:9090"
-      volumes:
-        - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      command:
-        - '--config.file=/etc/prometheus/prometheus.yml'
-      restart: unless-stopped
+    image: prom/prometheus:v2.52.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+
   grafana:
-      image: grafana/grafana:latest
-      container_name: grafana
-      ports:
-        - "3001:3000"
-      volumes:
-        - grafana-data:/var/lib/grafana
-      environment:
-        - GF_SECURITY_ADMIN_USER=admin
-        - GF_SECURITY_ADMIN_PASSWORD=admin
+    image: grafana/grafana:10.4.2
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+
 volumes:
+  postgres-data:
   grafana-data:
