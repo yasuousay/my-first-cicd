@@ -1,0 +1,41 @@
+name: Deploy Frontend to S3
+
+on:
+  push:
+    branches:
+      - main
+    # CỰC KỲ QUAN TRỌNG: Chỉ chạy kịch bản này nếu có file thay đổi trong thư mục 'frontend'
+    paths:
+      - 'frontend/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+
+      - name: Install dependencies and Build
+        # Trỏ lệnh npm vào đúng thư mục frontend
+        working-directory: ./frontend
+        run: |
+          npm install
+          npm run build
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy to S3
+        # Trỏ đường dẫn lấy file dist từ trong thư mục frontend
+        run: |
+          aws s3 sync frontend/dist/ s3://${{ secrets.S3_BUCKET_NAME }} --delete
