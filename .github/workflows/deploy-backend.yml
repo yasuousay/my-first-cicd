@@ -1,0 +1,38 @@
+name: Deploy Backend to EC2
+
+on:
+  push:
+    branches:
+      - main
+    # Chỉ chạy kịch bản khi thư mục backend có sự thay đổi
+    paths:
+      - 'backend/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: SSH into EC2 and Deploy
+        # Sử dụng thư viện ssh-action rất nổi tiếng của cộng đồng
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          # Đây là các lệnh mà Github sẽ gõ hệt như bạn đang gõ trên terminal EC2
+          script: |
+            # 1. Đi vào thư mục chứa code backend
+            cd ~/my-first-cicd/backend
+            
+            # 2. Xóa bỏ các thay đổi rác (nếu có) để tránh lỗi khi pull
+            git reset --hard
+            
+            # 3. Kéo code mới nhất từ nhánh main về
+            git pull origin main
+            
+            # 4. Cài đặt thư viện mới (nếu file package.json có cập nhật)
+            npm install
+            
+            # 5. Khởi động lại ứng dụng PM2
+            pm2 restart backend

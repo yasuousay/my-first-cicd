@@ -45,7 +45,7 @@ app.get("/api/health", (req, res) => {
 });
 
 app.get('/api/hello', (req, res) => {
-  res.json({ message: "Hello từ AWS EC2 Backend!" });
+  res.json({ message: "Hello từ AWS EC2 Backend! Auto CICD" });
 });
 
 app.listen(3000, () => {
