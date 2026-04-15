@@ -1,7 +1,10 @@
 const express = require('express');
+const cors = require('cors');
 const promClient = require('prom-client');
 
 const app = express();
+app.use(cors());
+app.use(express.json());
 
 // Tạo registry
 const register = new promClient.Registry();
@@ -41,6 +44,10 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "healthy", uptime: process.uptime() });
 });
 
-app.listen(8080, () => {
-  console.log("Backend running on port 8080 🚀");
+app.get('/api/hello', (req, res) => {
+  res.json({ message: "Hello từ AWS EC2 Backend!" });
+});
+
+app.listen(3000, () => {
+  console.log("Backend running on port 3000 🚀");
 });
