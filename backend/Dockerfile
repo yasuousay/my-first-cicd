@@ -8,7 +8,7 @@ RUN npm install
 COPY . .
 
 # nếu có build (TS)
-RUN npm run build || echo "skip build"
+# RUN npm run build || echo "skip build"
 
 # Stage 2: runtime
 FROM node:20-alpine
