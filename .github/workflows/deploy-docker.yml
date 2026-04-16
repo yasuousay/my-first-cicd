@@ -1,0 +1,35 @@
+name: Deploy Docker to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH, Create ENV and Deploy with Docker Compose
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          # Yêu cầu Github truyền giá trị của Secret ENV_FILE vào đây
+          envs: ENV_FILE
+          script: |
+            cd ~/my-first-cicd
+            
+            # Kéo code mới
+            git reset --hard
+            git pull origin main
+            
+            # Tự động tạo file .env từ Github Secrets bảo mật
+            echo "$ENV_FILE" > .env
+            
+            # Tắt hệ thống cũ và Build lại hệ thống mới
+            docker-compose down
+            docker-compose up -d --build
+            
+            # Dọn rác image thừa
+            docker image prune -f

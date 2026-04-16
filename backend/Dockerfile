@@ -24,5 +24,5 @@ RUN npm install --omit=dev
 # 👇 QUAN TRỌNG: copy từ stage builder
 COPY --from=builder /app ./
 
-EXPOSE 8080
+EXPOSE 3000
 CMD ["node", "server.js"]

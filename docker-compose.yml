@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   database:
     image: postgres:16-alpine
@@ -25,7 +27,11 @@ services:
       database:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/api/health || exit 1"]
+      # Đã sửa port 8080 thành 3000
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
 
   frontend:
     build: ./frontend
@@ -35,23 +41,26 @@ services:
       backend:
         condition: service_healthy
 
-  prometheus:
-    image: prom/prometheus:v2.52.0
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+  # TẠM ẨN 2 PHẦN DƯỚI ĐÂY ĐỂ TRÁNH QUÁ TẢI RAM LÚC DEPLOY LẦN ĐẦU
+  # Mở lại khi hệ thống chính đã chạy ổn định
+  
+  # prometheus:
+  #   image: prom/prometheus:v2.52.0
+  #   ports:
+  #     - "9090:9090"
+  #   volumes:
+  #     - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
 
-  grafana:
-    image: grafana/grafana:10.4.2
-    ports:
-      - "3001:3000"
-    volumes:
-      - grafana-data:/var/lib/grafana
-    environment:
-      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER}
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+  # grafana:
+  #   image: grafana/grafana:10.4.2
+  #   ports:
+  #     - "3001:3000"
+  #   volumes:
+  #     - grafana-data:/var/lib/grafana
+  #   environment:
+  #     GF_SECURITY_ADMIN_USER: ${GRAFANA_USER}
+  #     GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
 
 volumes:
   postgres-data:
-  grafana-data:
+  # grafana-data:

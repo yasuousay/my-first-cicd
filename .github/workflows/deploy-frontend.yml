@@ -3,7 +3,7 @@ name: Deploy Frontend to S3
 on:
   push:
     branches:
-      - main
+      - feature/test-pr
     # CỰC KỲ QUAN TRỌNG: Chỉ chạy kịch bản này nếu có file thay đổi trong thư mục 'frontend'
     paths:
       - 'frontend/**'

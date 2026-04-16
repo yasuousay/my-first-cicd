@@ -1,9 +1,9 @@
 name: CI Pipeline
 on:
   push:
-    branches: [ main ]
+    branches: [ feature/test-pr ]
   pull_request:
-    branches: [ main ]
+    branches: [ feature/test-pr ]
   schedule:
     - cron: '0 6 * * 1' # Chạy 6h sáng thứ 2 hàng tuần 
   workflow_dispatch: # Cho phép chạy thủ công từ GitHub UI
