@@ -69,3 +69,7 @@ $RECYCLE.BIN/
 
 # Built Visual Studio Code Extensions
 *.vsix
+.terraform
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
